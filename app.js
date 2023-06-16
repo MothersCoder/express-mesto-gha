@@ -23,9 +23,9 @@ app.use((req, res, next) => {
 
 app.use(routers);
 
-app.get('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
-});
+app.get('*', (req, res) => res.status(404).send({ message: 'Запрашиваемый ресурс не найден' }));
+app.patch('*', (req, res) => res.status(404).send({ message: 'Запрашиваемый ресурс не найден' }));
+app.post('*', (req, res) => res.status(404).send({ message: 'Запрашиваемый ресурс не найден' }));
 
 app.listen(PORT, hostname, () => {
   console.log('server running on port 3000');
