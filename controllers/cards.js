@@ -25,7 +25,7 @@ const createCard = (req, res) => {
 const getCards = (req, res) => {
   Card.find({}, 'name link owner likes')
     .then((card) => {
-      res.status(201);
+      res.status(200);
       res.send({ data: card });
     })
     .catch(() => res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` }));
@@ -33,13 +33,16 @@ const getCards = (req, res) => {
 
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then(() => {
-      res.status(200);
-      res.send('The card was delete successfully');
+    .then((card) => {
+      if (card === null) {
+        return res.status(ERROR.getData.code).send({ message: `Card for delete ${ERROR.getData.message}` });
+      }
+      return res.status(200).send(card);
     })
     .catch(() => {
       if (Card.findByIdAndRemove(undefined)) {
-        return res.status(ERROR.getData.code).send({ message: `Card ${ERROR.getData.message}` });
+        ERROR.uploadData.message = 'Используется несуществующий ID карточки';
+        return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
       }
       return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
     });
@@ -51,10 +54,16 @@ const like = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((newData) => res.send({ data: newData }))
+    .then((newData) => {
+      if (newData === null) {
+        return res.status(ERROR.getData.code).send({ message: `Card for your like ${ERROR.getData.message}` });
+      }
+      return res.send({ data: newData });
+    })
     .catch(() => {
       if (Card.findByIdAndUpdate(undefined)) {
-        return res.status(ERROR.getData.code).send({ message: `Card for your like ${ERROR.getData.message}` });
+        ERROR.uploadData.message = 'Используется несуществующий ID карточки';
+        return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
       }
       return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
     });
@@ -66,10 +75,16 @@ const dislike = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((newData) => res.send({ data: newData }))
+    .then((newData) => {
+      if (newData === null) {
+        return res.status(ERROR.getData.code).send({ message: `Card for your dislike ${ERROR.getData.message}` });
+      }
+      return res.send({ data: newData });
+    })
     .catch(() => {
       if (Card.findByIdAndUpdate(undefined)) {
-        return res.status(ERROR.getData.code).send({ message: `Card for your dislike ${ERROR.getData.message}` });
+        ERROR.uploadData.message = 'Используется несуществующий ID карточки';
+        return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
       }
       return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
     });

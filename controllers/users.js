@@ -33,12 +33,17 @@ const getUsers = (req, res) => {
 const getUserById = (req, res) => {
   User.findById(req.params.id, 'name about avatar')
     .then((user) => {
-      res.status(200).send({ data: user });
+      if (user === null) {
+        return res.status(ERROR.getData.code).send({ message: `User ${ERROR.getData.message}` });
+      }
+      return res.status(200).send({ data: user });
     })
     .catch(() => {
       if (User.findById(undefined)) {
-        return res.status(ERROR.getData.code).send({ message: `User ${ERROR.getData.message}` });
+        ERROR.uploadData.message = 'Неверно введен ID пользоватея';
+        return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
       }
+
       return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
     });
 };
