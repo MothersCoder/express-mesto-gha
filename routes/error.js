@@ -1,10 +1,11 @@
 const router = require('express').Router();
 const ERROR = require('../controllers/errors');
 
-ERROR.uploadData.message = 'Запрашиваемая страница не найдена';
+const errorCode = ERROR.getData.code;
+const errorMessage = `Page ${ERROR.getData.message}`;
 
-router.get('/', (req, res) => res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` }));
-router.patch('/', (req, res) => res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` }));
-router.post('/', (req, res) => res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` }));
+router.get('/', (req, res) => res.status(errorCode).send({ message: errorMessage }));
+router.patch('/', (req, res) => res.status(errorCode).send({ message: errorMessage }));
+router.post('/', (req, res) => res.status(errorCode).send({ message: errorMessage }));
 
 module.exports = router;
