@@ -9,8 +9,7 @@ const createUser = (req, res) => {
     name, about, avatar, validateBeforeSave: true,
   })
     .then((user) => {
-      res.status(201);
-      res.send({ data: user });
+      res.status(201).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -24,7 +23,6 @@ const createUser = (req, res) => {
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
-      res.status(200);
       res.send({ data: users });
     })
     .catch(() => res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` }));
@@ -38,8 +36,8 @@ const getUserById = (req, res) => {
       }
       return res.status(200).send({ data: user });
     })
-    .catch(() => {
-      if (User.findById(undefined)) {
+    .catch((err) => {
+      if (err.name === 'CastError') {
         ERROR.uploadData.message = 'Неверно введен ID пользоватея';
         return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
       }
@@ -49,12 +47,15 @@ const getUserById = (req, res) => {
 };
 
 const changeUserData = (req, res) => {
-  User.findByIdAndUpdate(req.user._id, req.body, { new: true, runValidators: true })
-    .then((newUserData) => res.status(200).send({ data: newUserData }))
-    .catch((err) => {
-      if (!req.user._id) {
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+    .then((newUserData) => {
+      if (!newUserData) {
         return res.status(ERROR.getData.code).send({ message: `User ${ERROR.getData.message}` });
       }
+      return res.status(200).send({ data: newUserData });
+    })
+    .catch((err) => {
       if (err.name === 'ValidationError') {
         ERROR.uploadData.message = Object.values(err.errors).map((error) => error.message).join(', ');
         return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
@@ -64,12 +65,15 @@ const changeUserData = (req, res) => {
 };
 
 const changeUserAvatar = (req, res) => {
-  User.findByIdAndUpdate(req.user._id, req.body, { new: true, runValidators: true })
-    .then((newUserData) => res.status(200).send({ data: newUserData }))
-    .catch((err) => {
-      if (!req.user._id) {
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+    .then((newUserData) => {
+      if (!newUserData) {
         return res.status(ERROR.getData.code).send({ message: `User ${ERROR.getData.message}` });
       }
+      return res.status(200).send({ data: newUserData });
+    })
+    .catch((err) => {
       if (err.name === 'ValidationError') {
         ERROR.uploadData.message = Object.values(err.errors).map((error) => error.message).join(', ');
         return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });

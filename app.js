@@ -1,4 +1,8 @@
 const express = require('express');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const rateLimit = require('express-rate-limit');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const helmet = require('helmet');
 const mongoose = require('mongoose');
 const routers = require('./routes');
 
@@ -22,6 +26,8 @@ app.use((req, res, next) => {
 });
 
 app.use(routers);
+app.use(rateLimit);
+app.use(helmet);
 
 app.listen(PORT, hostname, () => {
   console.log('server running on port 3000');

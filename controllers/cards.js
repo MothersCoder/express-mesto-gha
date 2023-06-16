@@ -10,7 +10,6 @@ const createCard = (req, res) => {
     name, link, owner, validateBeforeSave: true,
   })
     .then((card) => {
-      res.status(200);
       res.send({ data: card });
     })
     .catch((err) => {
@@ -39,8 +38,8 @@ const deleteCard = (req, res) => {
       }
       return res.status(200).send(card);
     })
-    .catch(() => {
-      if (Card.findByIdAndRemove(undefined)) {
+    .catch((err) => {
+      if (err.name === 'CastError') {
         ERROR.uploadData.message = 'Используется несуществующий ID карточки';
         return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
       }
@@ -60,8 +59,8 @@ const like = (req, res) => {
       }
       return res.send({ data: newData });
     })
-    .catch(() => {
-      if (Card.findByIdAndUpdate(undefined)) {
+    .catch((err) => {
+      if (err.name === 'CastError') {
         ERROR.uploadData.message = 'Используется несуществующий ID карточки';
         return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
       }
@@ -81,8 +80,8 @@ const dislike = (req, res) => {
       }
       return res.send({ data: newData });
     })
-    .catch(() => {
-      if (Card.findByIdAndUpdate(undefined)) {
+    .catch((err) => {
+      if (err.name === 'CastError') {
         ERROR.uploadData.message = 'Используется несуществующий ID карточки';
         return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
       }
