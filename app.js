@@ -23,8 +23,8 @@ app.use((req, res, next) => {
 
 app.use(routers);
 
-app.get('/', (req, res) => {
-  res.send('hello world2');
+app.get('*', (req, res) => {
+  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });
 
 app.listen(PORT, hostname, () => {
