@@ -6,16 +6,21 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
+    "dev:inspect": "nodemon --inspect app.js",
     "lint": "npx eslint ."
   },
   "author": "Nik",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
     "express": "^4.18.2",
     "express-rate-limit": "^6.7.0",
     "helmet": "^7.0.0",
-    "mongoose": "^7.2.4"
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.2.4",
+    "validator": "^13.9.0"
   },
   "devDependencies": {
     "eslint": "^8.42.0",

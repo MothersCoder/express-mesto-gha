@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const User = require('../models/user');
 
 const ERROR = require('./errors');
 
@@ -31,12 +32,17 @@ const getCards = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (card === null) {
         return res.status(ERROR.getData.code).send({ message: `Card for delete ${ERROR.getData.message}` });
       }
-      return res.status(200).send(card);
+      if (card.owner.id.equals(req.user._id)) {
+        Card.remove(card)
+          .then((userCard) => res.status(200).send(userCard));
+      } else {
+        console.log('Нельзя удалить карточку, которая была создана другим пользователем.');
+      }
     })
     .catch((err) => {
       if (err.name === 'CastError') {

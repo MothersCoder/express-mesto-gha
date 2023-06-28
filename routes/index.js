@@ -5,6 +5,7 @@ const wrongRout = require('./error');
 
 router.use('/users', userRouters);
 router.use('/cards', cardRouters);
+
 router.use('*', wrongRout);
 
 module.exports = router;

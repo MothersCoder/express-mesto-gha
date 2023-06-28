@@ -4,7 +4,12 @@ const rateLimit = require('express-rate-limit');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const helmet = require('helmet');
 const mongoose = require('mongoose');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const cookieParser = require('cookie-parser');
 const routers = require('./routes');
+const { auth } = require('./middlewares/auth');
+const login = require('./routes/signin');
+const register = require('./routes/signup');
 
 const app = express();
 const hostname = '0.0.0.0';
@@ -17,13 +22,11 @@ mongoose.connect('mongodb://0.0.0.0:27017/mestodb', {
   useNewUrlParser: true,
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '648a180209e0aa45d94f1c8f',
-  };
+app.use(login);
+app.use(register);
 
-  next();
-});
+app.use(cookieParser());
+app.use(auth);
 
 app.use(routers);
 app.use(rateLimit);
