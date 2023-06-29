@@ -1,5 +1,4 @@
 const Card = require('../models/card');
-const User = require('../models/user');
 
 const ERROR = require('./errors');
 
@@ -33,15 +32,16 @@ const getCards = (req, res) => {
 
 const deleteCard = (req, res) => {
   Card.findById(req.params.cardId)
+    // eslint-disable-next-line consistent-return
     .then((card) => {
       if (card === null) {
         return res.status(ERROR.getData.code).send({ message: `Card for delete ${ERROR.getData.message}` });
       }
-      if (card.owner.id.equals(req.user._id)) {
-        Card.remove(card)
+      if (card.owner.equals(req.user._id)) {
+        Card.deleteOne(card)
           .then((userCard) => res.status(200).send(userCard));
       } else {
-        console.log('Нельзя удалить карточку, которая была создана другим пользователем.');
+        res.status(403).send({ message: 'Нельзя удалить карточку, которая была создана другим пользователем.' });
       }
     })
     .catch((err) => {

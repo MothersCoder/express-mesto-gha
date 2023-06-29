@@ -96,7 +96,7 @@ const changeUserAvatar = (req, res) => {
 
 const login = (req, res) => {
   const { email, password } = req.body;
-  User.findOne({ email })
+  User.findOne({ email }).select('+password')
     // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
