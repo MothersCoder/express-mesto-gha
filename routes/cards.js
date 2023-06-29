@@ -24,17 +24,11 @@ router.put('/:cardId/likes', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().alphanum(),
   }).unknown(true),
-  user: Joi.object().keys({
-    _id: Joi.string().alphanum(),
-  }).unknown(true),
 }), like);
 
 router.delete('/:cardId/likes', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().alphanum(),
-  }).unknown(true),
-  user: Joi.object().keys({
-    _id: Joi.string().alphanum(),
   }).unknown(true),
 }), dislike);
 

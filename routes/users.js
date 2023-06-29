@@ -13,11 +13,7 @@ router.get('/:id', celebrate({
   }).unknown(true),
 }), getUserById);
 
-router.get('/me', celebrate({
-  user: Joi.object().keys({
-    _id: Joi.string().alphanum(),
-  }).unknown(true),
-}), getUserData);
+router.get('/me', getUserData);
 
 router.patch('/me', celebrate({
   body: Joi.object().keys({
