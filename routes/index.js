@@ -6,7 +6,7 @@ const cardRouters = require('./cards');
 const wrongRout = require('./error');
 
 router.use('/users', celebrate({
-  body: Joi.object.keys({
+  body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string(),
@@ -15,7 +15,7 @@ router.use('/users', celebrate({
   }),
 }), userRouters);
 router.use('/cards', celebrate({
-  body: Joi.object.keys({
+  body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     link: Joi.string().required(),
   }),
