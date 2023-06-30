@@ -17,7 +17,7 @@ const getUserInfo = (id, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        ERROR.uploadData.message = 'Неверно введен ID пользоватея';
+        ERROR.uploadData.message = 'Неверно введен ID пользователя';
         return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
       }
 
@@ -57,10 +57,6 @@ const getUsers = (req, res) => {
       res.send({ data: users });
     })
     .catch(() => res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` }));
-};
-
-const getUserById = (req, res) => {
-  getUserInfo(req.params.id, res);
 };
 
 const changeUserData = (req, res) => {
@@ -129,6 +125,10 @@ const login = (req, res) => {
 
 const getUserData = (req, res) => {
   getUserInfo(req.user._id, res);
+};
+
+const getUserById = (req, res) => {
+  getUserInfo(req.params.id, res);
 };
 
 module.exports = {
