@@ -6,9 +6,9 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
-  Card.create({
+  Card.create([{
     name, link, owner, validateBeforeSave: true,
-  })
+  }], { validateBeforeSave: true })
     .then((card) => {
       res.send({ data: card });
     })
