@@ -2,8 +2,6 @@ const express = require('express');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const rateLimit = require('express-rate-limit');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { celebrate, Joi } = require('celebrate');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { errors } = require('celebrate');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const helmet = require('helmet');
@@ -26,18 +24,8 @@ mongoose.connect('mongodb://0.0.0.0:27017/mestodb', {
   useNewUrlParser: true,
 });
 
-app.use(celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
-  }),
-}), login);
-app.use(celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(6).max(10),
-  }),
-}), register);
+app.use(login);
+app.use(register);
 
 app.use(cookieParser());
 app.use(auth);

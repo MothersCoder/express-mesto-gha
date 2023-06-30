@@ -29,20 +29,25 @@ const createUser = (req, res) => {
   const {
     name, about, avatar, email,
   } = req.body;
-
-  bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
-      name, about, avatar, email, password: hash, validateBeforeSave: true,
-    }))
+  User.findOne({ email })
     .then((user) => {
-      res.status(201).send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        ERROR.uploadData.message = Object.values(err.errors).map((error) => error.message).join(', ');
-        return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
+      if (user) {
+        return res.status(409).send({ message: 'Пользователь с таким адресом уже зарегестрирован.' });
       }
-      return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
+      bcrypt.hash(req.body.password, 10)
+        .then((hash) => User.create([{
+          name, about, avatar, email, password: hash,
+        }], { validateBeforeSave: true }))
+        .then((user) => {
+          res.status(201).send(user);
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            ERROR.uploadData.message = Object.values(err.errors).map((error) => error.message).join(', ');
+            return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
+          }
+          return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
+        });
     });
 };
 
