@@ -25,7 +25,7 @@ const getUserById = (req, res, next) => {
   getUserInfo(req.params.id, res, next);
 };
 
-const createUser = (req, res, next) => {
+const createUser = (req, res) => {
   const {
     name, about, avatar, email,
   } = req.body;
@@ -38,12 +38,12 @@ const createUser = (req, res, next) => {
       return bcrypt.hash(req.body.password, 10);
     })
     .then((hash) => User.create({
-      name, about, avatar, email, password: hash, validateBeforeSave: true,
-    }))
+      name, about, avatar, email, password: hash,
+    }, { validateBeforeSave: true }))
     .then((user) => {
       res.status(201).send(user);
     })
-    .catch(next);
+    .catch((err) => res.status(400).send(err));
 };
 
 const getUsers = (req, res, next) => {
