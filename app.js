@@ -35,6 +35,15 @@ app.use(rateLimit);
 app.use(helmet);
 
 app.use(errors());
+app.use((err, req, res, next) => {
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
+  } else {
+    res.status(500).send({ message: err.message || 'На сервере произошла ошибка, повторите свой запрос позже' });
+  }
+
+  next();
+});
 
 app.listen(PORT, hostname, () => {
   console.log('server running on port 3000');

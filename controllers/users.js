@@ -5,107 +5,79 @@ const jwt = require('jsonwebtoken');
 const { tokenKey } = require('./token-key');
 const User = require('../models/user');
 
-const ERROR = require('./errors');
+const NotFoundError = require('../errors/not-found-err');
+const Conflict = require('../errors/conflict-err');
+const BadRequest = require('../errors/bad-request-err');
+const Forbidden = require('../errors/forbidden-err');
 
-const getUserInfo = (id, res) => {
+const getUserInfo = (id, res, next) => {
   User.findById(id, 'name about avatar email')
-    .then((user) => {
-      if (user === null) {
-        return res.status(ERROR.getData.code).send({ message: `User ${ERROR.getData.message}` });
-      }
-      return res.status(200).send({ data: user });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        ERROR.uploadData.message = 'Неверно введен ID пользователя';
-        return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
-      }
-
-      return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
-    });
+    .orFail(() => new NotFoundError('Пользователя с таким ID не существует.'))
+    .then((user) => res.status(200).send({ data: user }))
+    .catch(next);
 };
 
-const createUser = (req, res) => {
+const getUserData = (req, res, next) => {
+  getUserInfo(req.user._id, res, next);
+};
+
+const getUserById = (req, res, next) => {
+  getUserInfo(req.params.id, res, next);
+};
+
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email,
   } = req.body;
+
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        return res.status(409).send({ message: 'Пользователь с таким адресом уже зарегестрирован.' });
+        throw new Conflict('Пользователь с таким e-mail уже зарегистрирован');
       }
-      bcrypt.hash(req.body.password, 10)
-        .then((hash) => User.create([{
-          name, about, avatar, email, password: hash,
-        }], { validateBeforeSave: true }))
-        .then((user) => {
-          res.status(201).send(user);
-        })
-        .catch((err) => {
-          if (err.name === 'ValidationError') {
-            ERROR.uploadData.message = Object.values(err.errors).map((error) => error.message).join(', ');
-            return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
-          }
-          return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
-        });
-    });
+      return bcrypt.hash(req.body.password, 10);
+    })
+    .then((hash) => User.create([{
+      name, about, avatar, email, password: hash,
+    }], { validateBeforeSave: true }))
+    .then((user) => {
+      res.status(201).send(user);
+    })
+    .catch(next);
 };
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.send({ data: users });
     })
-    .catch(() => res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` }));
+    .catch(next);
 };
 
-const changeUserData = (req, res) => {
+const changeUserData = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .then((newUserData) => {
-      if (!newUserData) {
-        return res.status(ERROR.getData.code).send({ message: `User ${ERROR.getData.message}` });
-      }
-      return res.status(200).send({ data: newUserData });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        ERROR.uploadData.message = Object.values(err.errors).map((error) => error.message).join(', ');
-        return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
-      }
-      return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
-    });
+    .orFail(() => new NotFoundError('Пользователь не найден, указан неверный ID'))
+    .then((newUserData) => res.status(200).send({ data: newUserData }))
+    .catch(next);
 };
 
-const changeUserAvatar = (req, res) => {
+const changeUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((newUserData) => {
-      if (!newUserData) {
-        return res.status(ERROR.getData.code).send({ message: `User ${ERROR.getData.message}` });
-      }
-      return res.status(200).send({ data: newUserData });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        ERROR.uploadData.message = Object.values(err.errors).map((error) => error.message).join(', ');
-        return res.status(ERROR.uploadData.code).send({ message: `${ERROR.uploadData.message}` });
-      }
-      return res.status(ERROR.server.code).send({ message: `${ERROR.server.message}` });
-    });
+    .orFail(() => new NotFoundError('Пользователь с таким ID не найден'))
+    .then((newUserData) => res.status(200).send({ data: newUserData }))
+    .catch(next);
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
-    // eslint-disable-next-line consistent-return
+    .orFail(() => new BadRequest('Неверный логин или пароль'))
     .then((user) => {
-      if (!user) {
-        return Promise.reject(new Error('Такового пользователя не существует'));
-      }
       bcrypt.compare(password, user.password, (err, isPasswordMatch) => {
         if (!isPasswordMatch) {
-          return res.status(403).send({ message: 'Неправильный логин или пароль' });
+          throw new Forbidden('Неверный логин или пароль');
         }
         const token = jwt.sign({ _id: user._id }, tokenKey, { expiresIn: '7d' });
         res.cookie('jwt', token, {
@@ -118,17 +90,7 @@ const login = (req, res) => {
         );
       });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
-};
-
-const getUserData = (req, res) => {
-  getUserInfo(req.user._id, res);
-};
-
-const getUserById = (req, res) => {
-  getUserInfo(req.params.id, res);
+    .catch(next);
 };
 
 module.exports = {

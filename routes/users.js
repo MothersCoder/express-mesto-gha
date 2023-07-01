@@ -6,24 +6,12 @@ const {
 } = require('../controllers/users');
 
 router.get('/', getUsers);
-
-router.get('/:id', celebrate({
-  params: Joi.object().keys({
-    id: Joi.string().alphanum().min(24),
-  }).unknown(true),
-}), getUserById);
-
 router.get('/me', getUserData);
-
 router.patch('/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().uri({
-      scheme: [
-        /^https?:\/\/(www\.)?[a-zA-Z0-9-]*\.[a-zA-Z0-9]*\b([a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]*)#?/,
-      ],
-    }),
+    avatar: Joi.string().uri(),
     email: Joi.string().email(),
   }).unknown(true),
 }), changeUserData);
@@ -33,5 +21,11 @@ router.patch('/me/avatar', celebrate({
     avatar: Joi.string().uri(),
   }).unknown(true),
 }), changeUserAvatar);
+
+router.get('/:id', celebrate({
+  params: Joi.object().keys({
+    id: Joi.string().alphanum().min(24),
+  }).unknown(true),
+}), getUserById);
 
 module.exports = router;
