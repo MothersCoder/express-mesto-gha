@@ -46,9 +46,7 @@ const like = (req, res, next) => {
     { new: true },
   )
     .orFail(() => new NotFoundError('Карточка, которую вы хотите лайкнуть не найдена'))
-    .then((newData) => {
-      return res.send({ data: newData });
-    })
+    .then((newData) => res.send({ data: newData }))
     .catch(next);
 };
 
@@ -59,9 +57,7 @@ const dislike = (req, res, next) => {
     { new: true },
   )
     .orFail(() => new NotFoundError('Карточка, которую вы хотите возненавидеть не найдена :)'))
-    .then((newData) => {
-      return res.send({ data: newData });
-    })
+    .then((newData) => res.send({ data: newData }))
     .catch(next);
 };
 
