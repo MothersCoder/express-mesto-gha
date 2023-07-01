@@ -25,7 +25,7 @@ const getUserById = (req, res, next) => {
   getUserInfo(req.params.id, res, next);
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email,
   } = req.body;
@@ -43,7 +43,7 @@ const createUser = (req, res) => {
     .then((user) => {
       res.status(201).send(user);
     })
-    .catch((err) => res.status(400).send(err));
+    .catch(next);
 };
 
 const getUsers = (req, res, next) => {
