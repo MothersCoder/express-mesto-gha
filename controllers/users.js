@@ -7,8 +7,8 @@ const User = require('../models/user');
 
 const NotFoundError = require('../errors/not-found-err');
 const Conflict = require('../errors/conflict-err');
-const BadRequest = require('../errors/bad-request-err');
 const Forbidden = require('../errors/forbidden-err');
+const Unautorized = require('../errors/unauthorized-err');
 
 const getUserInfo = (id, res, next) => {
   User.findById(id, 'name about avatar email')
@@ -73,7 +73,7 @@ const changeUserAvatar = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
-    .orFail(() => new BadRequest('Неверный логин или пароль'))
+    .orFail(() => new Unautorized('Неверный логин или пароль'))
     .then((user) => {
       bcrypt.compare(password, user.password, (err, isPasswordMatch) => {
         if (!isPasswordMatch) {

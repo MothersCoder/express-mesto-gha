@@ -1,13 +1,14 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
 const { tokenKey } = require('../controllers/token-key');
+const Unautorized = require('../errors/unauthorized-err');
 
 // eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
   const token = req.cookies.jwt;
 
   if (!token) {
-    return res.status(401).send({ message: 'Пожалуйста, авторизуйтесь' });
+    throw new Unautorized('Пожалуйста, авторизуйтесь');
   }
 
   let payload;
@@ -15,7 +16,7 @@ const auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, tokenKey);
   } catch (err) {
-    return res.status(401).send({ message: 'Проблемы с авторизацией. Пожалуйста, перелогиньтесь.' });
+    throw new Unautorized('Пожалуйста, авторизуйтесь');
   }
 
   req.user = payload;
