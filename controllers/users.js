@@ -39,7 +39,7 @@ const createUser = (req, res) => {
     })
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
-    }, { validateBeforeSave: true }))
+    }))
     .then((user) => {
       res.status(201).send(user);
     })
