@@ -11,7 +11,7 @@ const createCard = (req, res, next) => {
     name, link, owner, validateBeforeSave: true,
   }], { validateBeforeSave: true })
     .then((card) => {
-      res.send({ data: card });
+      res.send(card);
     })
     .catch(next);
 };
