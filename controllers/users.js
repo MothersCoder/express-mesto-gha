@@ -88,23 +88,21 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
     .orFail(() => new Unautorized('Неверный логин или пароль'))
-    .then((user) => bcrypt.compare(password, user.password))
-    .then((matched) => {
-      if (!matched) {
-        throw new Unautorized('Неверный логин или пароль');
-      }
-    })
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, tokenKey, { expiresIn: '7d' });
-      res.cookie('jwt', token, {
-        maxAge: 3600000 * 24 * 7,
-        httpOnly: true,
-        sameSite: true,
-      });
-      return (
-        res.status(200).send({ token })
-      );
-    })
+    .then((user) => bcrypt.compare(password, user.password)
+      .then((matched) => {
+        if (!matched) {
+          throw new Unautorized('Неверный логин или пароль');
+        }
+        const token = jwt.sign({ _id: user._id }, tokenKey, { expiresIn: '7d' });
+        res.cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          sameSite: true,
+        });
+        return (
+          res.status(200).send({ token })
+        );
+      }))
     .catch(next);
 };
 
