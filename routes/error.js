@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-router.use((err, req, res, next) => {
+router.use('/', (err, req, res, next) => {
   if (err.statusCode) {
     res.status(err.statusCode).send({ message: err.message });
   } else {
