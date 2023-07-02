@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const userRouters = require('./users');
 const cardRouters = require('./cards');
-const wrongRout = require('./error');
+const wrongRout = require('../middlewares/error');
 
 router.use('/users', userRouters);
 router.use('/cards', cardRouters);
