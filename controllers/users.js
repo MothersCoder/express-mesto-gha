@@ -9,6 +9,7 @@ const NotFoundError = require('../errors/not-found-err');
 const Conflict = require('../errors/conflict-err');
 const Forbidden = require('../errors/forbidden-err');
 const Unautorized = require('../errors/unauthorized-err');
+const BadRequest = require('../errors/bad-request-err');
 
 const getUserInfo = (id, res, next) => {
   User.findById(id, 'name about avatar email')
@@ -38,15 +39,14 @@ const createUser = (req, res, next) => {
       res.status(201).send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new NotFoundError('Некорректная ссылка на аватар'));
-        return;
-      }
       if (err.code === 11000) {
         next(new Conflict('Пользователь с таким email уже зарегистрирован'));
         return;
       }
-
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        next(new BadRequest('Некорректная ссылка на аватар'));
+        return;
+      }
       next(err);
     });
 };
