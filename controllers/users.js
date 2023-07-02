@@ -9,6 +9,7 @@ const NotFoundError = require('../errors/not-found-err');
 const Conflict = require('../errors/conflict-err');
 const Forbidden = require('../errors/forbidden-err');
 const Unautorized = require('../errors/unauthorized-err');
+const { errors } = require('celebrate');
 
 const getUserInfo = (id, res, next) => {
   User.findById(id, 'name about avatar email')
@@ -30,20 +31,25 @@ const createUser = (req, res, next) => {
     name, about, avatar, email,
   } = req.body;
 
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        throw new Conflict('Пользователь с таким e-mail уже зарегистрирован');
-      }
-      return bcrypt.hash(req.body.password, 10);
-    })
+  bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
     .then((user) => {
       res.status(201).send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        next(new NotFoundError('Некорректная ссылка на аватар'));
+        return;
+      }
+      if (err.code === 11000) {
+        next(new Conflict('Пользователь с таким email уже зарегистрирован'));
+        return;
+      }
+
+      next(err);
+    });
 };
 
 const getUsers = (req, res, next) => {
