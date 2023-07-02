@@ -12,7 +12,7 @@ const routers = require('./routes');
 const { auth } = require('./middlewares/auth');
 const login = require('./routes/signin');
 const register = require('./routes/signup');
-const error = require('./middlewares/error');
+const { error } = require('./middlewares/error');
 
 const app = express();
 const hostname = '0.0.0.0';
