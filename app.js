@@ -12,7 +12,7 @@ const routers = require('./routes');
 const { auth } = require('./middlewares/auth');
 const login = require('./routes/signin');
 const register = require('./routes/signup');
-/* const error = require('./routes/error'); */
+const error = require('./routes/error');
 
 const app = express();
 const hostname = '0.0.0.0';
@@ -55,7 +55,7 @@ app.use((err, req, res, next) => {
 
   next();
 });
-/* app.use(error); */
+app.use(error);
 
 app.listen(PORT, hostname, () => {
   console.log('server running on port 3000');
