@@ -9,7 +9,6 @@ const NotFoundError = require('../errors/not-found-err');
 const Conflict = require('../errors/conflict-err');
 const Forbidden = require('../errors/forbidden-err');
 const Unautorized = require('../errors/unauthorized-err');
-const { errors } = require('celebrate');
 
 const getUserInfo = (id, res, next) => {
   User.findById(id, 'name about avatar email')
