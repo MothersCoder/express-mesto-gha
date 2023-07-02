@@ -1,6 +1,4 @@
-const router = require('express').Router();
-
-router.use('/', (err, req, res, next) => {
+module.exports = (err, req, res, next) => {
   if (err.statusCode) {
     res.status(err.statusCode).send({ message: err.message });
   } else {
@@ -8,6 +6,4 @@ router.use('/', (err, req, res, next) => {
   }
 
   next();
-});
-
-module.exports = router;
+};
