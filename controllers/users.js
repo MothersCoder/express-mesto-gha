@@ -9,6 +9,7 @@ const NotFoundError = require('../errors/not-found-err');
 const Conflict = require('../errors/conflict-err');
 const Forbidden = require('../errors/forbidden-err');
 const Unautorized = require('../errors/unauthorized-err');
+const BadRequest = require('../errors/bad-request-err');
 
 const getUserInfo = (id, res, next) => {
   User.findById(id, 'name about avatar email')
@@ -42,6 +43,10 @@ const createUser = (req, res, next) => {
         next(new Conflict('Пользователь с таким email уже зарегистрирован'));
         return;
       }
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Введены некорректные данные при создании пользователя'));
+        return;
+      }
       next(err);
     });
 };
@@ -59,7 +64,13 @@ const changeUserData = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(() => new NotFoundError('Пользователь не найден, указан неверный ID'))
     .then((newUserData) => res.status(200).send({ data: newUserData }))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Введены некорректные данные при изменении пользователя'));
+        return;
+      }
+      next(err);
+    });
 };
 
 const changeUserAvatar = (req, res, next) => {
@@ -67,28 +78,36 @@ const changeUserAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail(() => new NotFoundError('Пользователь с таким ID не найден'))
     .then((newUserData) => res.status(200).send({ data: newUserData }))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Введены некорректные данные при изменении аватара пользователя'));
+        return;
+      }
+      next(err);
+    });
 };
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
     .orFail(() => new Unautorized('Неверный логин или пароль'))
+    // eslint-disable-next-line arrow-body-style
     .then((user) => {
-      bcrypt.compare(password, user.password, (err, isPasswordMatch) => {
-        if (!isPasswordMatch) {
-          throw new Forbidden('Неверный логин или пароль');
-        }
-        const token = jwt.sign({ _id: user._id }, tokenKey, { expiresIn: '7d' });
-        res.cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-          sameSite: true,
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new Unautorized('Неверный логин или пароль');
+          }
+          const token = jwt.sign({ _id: user._id }, tokenKey, { expiresIn: '7d' });
+          res.cookie('jwt', token, {
+            maxAge: 3600000 * 24 * 7,
+            httpOnly: true,
+            sameSite: true,
+          });
+          return (
+            res.status(200).send({ token })
+          );
         });
-        return (
-          res.status(200).send({ token })
-        );
-      });
     })
     .catch(next);
 };

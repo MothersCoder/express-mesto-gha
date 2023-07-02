@@ -1,9 +1,13 @@
 const router = require('express').Router();
-const ERROR = require('../controllers/errors');
 
-const errorCode = ERROR.getData.code;
-const errorMessage = `Page ${ERROR.getData.message}`;
+router.use((err, req, res, next) => {
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
+  } else {
+    res.status(500).send({ message: err.message || 'На сервере произошла ошибка, повторите свой запрос позже' });
+  }
 
-router.use('/', (req, res) => res.status(errorCode).send({ message: errorMessage }));
+  next();
+});
 
 module.exports = router;

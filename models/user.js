@@ -47,9 +47,6 @@ const userSchema = new mongoose.Schema({
     require: true,
     select: false,
   },
-  token: {
-    type: String,
-  },
 });
 
 userSchema.methods.toJSON = function () {

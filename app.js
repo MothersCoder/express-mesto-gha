@@ -12,6 +12,7 @@ const routers = require('./routes');
 const { auth } = require('./middlewares/auth');
 const login = require('./routes/signin');
 const register = require('./routes/signup');
+const error = require('./routes/error');
 
 const app = express();
 const hostname = '0.0.0.0';
@@ -24,6 +25,9 @@ mongoose.connect('mongodb://0.0.0.0:27017/mestodb', {
   useNewUrlParser: true,
 });
 
+app.use(rateLimit);
+app.use(helmet);
+
 app.use(login);
 app.use(register);
 
@@ -31,19 +35,12 @@ app.use(cookieParser());
 app.use(auth);
 
 app.use(routers);
-app.use(rateLimit);
-app.use(helmet);
+app.get('/signout', (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Выход' });
+});
 
 app.use(errors());
-app.use((err, req, res, next) => {
-  if (err.statusCode) {
-    res.status(err.statusCode).send({ message: err.message });
-  } else {
-    res.status(500).send({ message: err.message || 'На сервере произошла ошибка, повторите свой запрос позже' });
-  }
-
-  next();
-});
+app.use(error);
 
 app.listen(PORT, hostname, () => {
   console.log('server running on port 3000');
