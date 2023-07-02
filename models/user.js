@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const isEmail = require('validator/lib/isEmail');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const isLength = require('validator/lib/isLength');
 
 const userSchema = new mongoose.Schema({
@@ -47,8 +45,10 @@ const userSchema = new mongoose.Schema({
     require: true,
     select: false,
   },
+  token: {
+    type: String,
+  },
 });
-
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;

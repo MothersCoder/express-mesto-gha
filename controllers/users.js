@@ -1,13 +1,10 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
 const { tokenKey } = require('./token-key');
 const User = require('../models/user');
 
 const NotFoundError = require('../errors/not-found-err');
 const Conflict = require('../errors/conflict-err');
-const Forbidden = require('../errors/forbidden-err');
 const Unautorized = require('../errors/unauthorized-err');
 const BadRequest = require('../errors/bad-request-err');
 
@@ -93,21 +90,23 @@ const login = (req, res, next) => {
     .orFail(() => new Unautorized('Неверный логин или пароль'))
     // eslint-disable-next-line arrow-body-style
     .then((user) => {
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            throw new Unautorized('Неверный логин или пароль');
-          }
-          const token = jwt.sign({ _id: user._id }, tokenKey, { expiresIn: '7d' });
-          res.cookie('jwt', token, {
-            maxAge: 3600000 * 24 * 7,
-            httpOnly: true,
-            sameSite: true,
-          });
-          return (
-            res.status(200).send({ token })
-          );
-        });
+      return bcrypt.compare(password, user.password);
+    })
+    .then((matched) => {
+      if (!matched) {
+        throw new Unautorized('Неверный логин или пароль');
+      }
+    })
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, tokenKey, { expiresIn: '7d' });
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+        sameSite: true,
+      });
+      return (
+        res.status(200).send({ token })
+      );
     })
     .catch(next);
 };
