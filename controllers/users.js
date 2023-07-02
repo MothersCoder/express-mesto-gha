@@ -88,10 +88,7 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
     .orFail(() => new Unautorized('Неверный логин или пароль'))
-    // eslint-disable-next-line arrow-body-style
-    .then((user) => {
-      return bcrypt.compare(password, user.password);
-    })
+    .then((user) => bcrypt.compare(password, user.password))
     .then((matched) => {
       if (!matched) {
         throw new Unautorized('Неверный логин или пароль');
