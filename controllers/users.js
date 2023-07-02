@@ -35,13 +35,14 @@ const createUser = (req, res, next) => {
     .then((user) => {
       res.status(201).send(user);
     })
-    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.code === 11000) {
-        return new Conflict('Пользователь с таким email уже зарегистрирован');
+        next(new Conflict('Пользователь с таким email уже зарегистрирован'));
+        return;
       }
       if (err.name === 'ValidationError') {
-        return new BadRequest('Введены некорректные данные при создании пользователя');
+        next(new BadRequest('Введены некорректные данные при создании пользователя'));
+        return;
       }
       next(err);
     });
