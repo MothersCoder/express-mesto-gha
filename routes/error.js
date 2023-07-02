@@ -1,9 +1,5 @@
-module.exports = (err, req, res, next) => {
-  if (err.statusCode) {
-    res.status(err.statusCode).send({ message: err.message });
-  } else {
-    res.status(500).send({ message: err.message || 'На сервере произошла ошибка, повторите свой запрос позже' });
-  }
+const router = require('express').Router();
 
-  next();
-};
+router.use('/', (req, res) => res.status(404).send({ message: 'Страница не найдена' }));
+
+module.exports = router;

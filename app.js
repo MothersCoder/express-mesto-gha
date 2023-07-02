@@ -12,7 +12,6 @@ const routers = require('./routes');
 const { auth } = require('./middlewares/auth');
 const login = require('./routes/signin');
 const register = require('./routes/signup');
-const error = require('./routes/error');
 
 const app = express();
 const hostname = '0.0.0.0';
@@ -46,7 +45,15 @@ app.get('/signout', (req, res) => {
 });
 
 app.use(errors());
-app.use(error);
+app.use((err, req, res, next) => {
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
+  } else {
+    res.status(500).send({ message: err.message || 'На сервере произошла ошибка, повторите свой запрос позже' });
+  }
+
+  next();
+});
 
 app.listen(PORT, hostname, () => {
   console.log('server running on port 3000');
